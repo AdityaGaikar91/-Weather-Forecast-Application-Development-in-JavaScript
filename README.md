@@ -25,4 +25,4 @@ A simple, clean weather forecast web application built with vanilla JavaScript a
 
    ```bash
    git clone https://github.com/yourusername/weather-forecast-app.git
-   cd weather-forecast-app
+   cd Weather-Forecast-Application-Development-in-JavaScript
