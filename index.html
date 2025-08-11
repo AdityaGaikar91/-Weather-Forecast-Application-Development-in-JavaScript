@@ -1,11 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    
-</body>
+    <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Weather Forecast Application</title>
+    <meta name="description" content="Aurora Weather: Search city or use your location to see today's weather and a 5‑day forecast. JS + TailwindCSS." />
+    <link rel="canonical" href="/index.js" />
+    <link rel="icon" href="/favicon.ico" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Minimal custom styles for toasts and rainy background */
+      .toast-container { position: fixed; right: 1rem; bottom: 1rem; z-index: 50; display: grid; gap: .5rem; }
+      .toast { background: white; border: 1px solid rgb(229 231 235); box-shadow: 0 10px 20px -5px rgba(0,0,0,.1); padding: .75rem 1rem; border-radius: .5rem; font-size: .875rem; }
+      .toast--destructive { border-color: rgb(254 202 202); background: rgb(254 242 242); color: rgb(127 29 29); }
+      .rainy-bg { background-image: linear-gradient(to bottom, rgba(30,58,138,.9), rgba(15,23,42,.95)); }
+    </style>
+  </head>
+  <body class="min-h-screen bg-gradient-to-b from-sky-50 to-blue-100 text-slate-900">
+    <header class="container mx-auto px-4 py-6">
+      <nav class="flex items-center justify-between">
+        <a href="/" class="inline-flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c1.657 0 3-1.567 3-3.5S13.657 4 12 4s-3 1.567-3 3.5S10.343 11 12 11z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 10.5C19.5 16 12 21 12 21S4.5 16 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+          <span class="font-semibold tracking-tight">Weather Forecast Application</span>
+        </a>
+      </nav>
+    </header>
+
+    <main class="container mx-auto px-4 pb-12">
+      <section class="mb-6">
+        <h1 class="text-3xl md:text-4xl font-bold tracking-tight mb-2">Weather Forecast</h1>
+        <p class="text-slate-600">Search by city or use your current location to view today's weather and a 5‑day outlook.</p>
+      </section>
+
+      <section aria-label="Search" class="mb-8">
+        <div class="flex flex-col sm:flex-row gap-3">
+          <div class="flex-1 flex gap-2">
+            <input id="city-input" type="text" placeholder="Search city..." aria-label="City search" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <button id="search-btn" class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <span>Search</span>
+            </button>
+          </div>
+          <div class="flex items-center gap-2">
+            <div id="recent-wrapper" class="hidden">
+              <label for="recent-select" class="sr-only">Recent cities</label>
+              <select id="recent-select" class="border rounded-md px-3 py-2 bg-white min-w-[160px]"></select>
+            </div>
+            <button id="locate-btn" class="inline-flex items-center gap-2 border px-4 py-2 rounded-md hover:bg-slate-50 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="m19.8 7-3.5 2"/><path d="M22 14h-4"/><path d="m19.8 21-3.5-2"/><path d="M12 22v-4"/><path d="m4.2 21 3.5-2"/><path d="M2 14h4"/><path d="m4.2 7 3.5 2"/><circle cx="12" cy="14" r="4"/></svg>
+              <span>Use my location</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid gap-6 md:grid-cols-2">
+        <article class="rounded-lg border bg-white/70 backdrop-blur p-6 shadow">
+          <header class="mb-4 flex items-center justify-between">
+            <h2 id="today-title" class="text-xl font-semibold">Today</h2>
+            <div id="today-icon" aria-hidden="true"></div>
+          </header>
+          <div id="today-content" class="space-y-4">
+            <div class="flex items-center gap-4">
+              <div id="today-temp" class="text-5xl font-bold">--°C</div>
+              <div class="flex items-center gap-2 text-slate-600">
+                <label for="unit-toggle" class="text-sm">°C/°F</label>
+                <input id="unit-toggle" type="checkbox" class="h-5 w-10 appearance-none bg-slate-200 rounded-full relative outline-none cursor-pointer transition before:absolute before:top-[2px] before:left-[2px] before:h-4 before:w-4 before:bg-white before:rounded-full before:transition checked:bg-blue-600 checked:before:translate-x-5" />
+              </div>
+            </div>
+            <p id="today-summary" class="text-sm text-slate-600"></p>
+            <hr class="border-slate-200" />
+            <div class="grid grid-cols-3 gap-4 text-sm">
+              <div class="flex items-center gap-2"><span>🌡️</span><span id="today-range">--° / --°C</span></div>
+              <div class="flex items-center gap-2"><span>🌬️</span><span id="today-wind">-- km/h</span></div>
+              <div class="flex items-center gap-2"><span>💧</span><span id="today-humidity">--%</span></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="rounded-lg border bg-white/70 backdrop-blur p-6 shadow overflow-hidden">
+          <header class="mb-4">
+            <h2 class="text-xl font-semibold">5‑Day Forecast</h2>
+          </header>
+          <div id="forecast-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"></div>
+        </article>
+      </section>
+    </main>
+
+
+    <div id="toast-root" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="index.js" defer></script>
+  </body>
 </html>
