@@ -15,7 +15,7 @@ A simple, clean weather forecast web application built with vanilla JavaScript a
 ## Tech Stack
 
 - HTML5
-- Vanilla ES6+ JavaScript
+- ES6+ JavaScript
 - Tailwind CSS for styling
 - Open-Meteo API for weather data and geocoding (free and no API key needed)
 
